@@ -147,7 +147,7 @@ Transform:
   m_GameObject: {fileID: 425478770}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.14, z: 0}
+  m_LocalPosition: {x: 0, y: -1.651, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -301,8 +301,8 @@ GameObject:
   - component: {fileID: 1066561360}
   - component: {fileID: 1066561359}
   - component: {fileID: 1066561358}
-  - component: {fileID: 1066561361}
   - component: {fileID: 1066561362}
+  - component: {fileID: 1066561361}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -378,7 +378,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 4e89789d7d58d491b84c4ce00750495c, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e6c23e21bc3834edba6dfa75ff2a14ac, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -398,7 +398,7 @@ Transform:
   m_GameObject: {fileID: 1066561357}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.2599, y: -0.4058, z: 0.01915237}
+  m_LocalPosition: {x: -2.2599, y: -0.225, z: 0.01915237}
   m_LocalScale: {x: 0.4674, y: 0.4674, z: 0.4674}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -456,18 +456,18 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.24499014, y: 0.00000011920929}
   m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
+    border: {x: 1.12, y: 0.24, z: 0.555, w: 0.24}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.14, y: 2.35}
+    oldSize: {x: 3.84, y: 3.84}
     newSize: {x: 2.14, y: 2.35}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 2.14, y: 2.35}
+  m_Size: {x: 2.303327, y: 3.384402}
   m_EdgeRadius: 0
 --- !u!1 &1428628054
 GameObject:
@@ -481,7 +481,7 @@ GameObject:
   - component: {fileID: 1428628057}
   - component: {fileID: 1428628056}
   - component: {fileID: 1428628058}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: Tilemap
   m_TagString: Untagged
   m_Icon: {fileID: 0}

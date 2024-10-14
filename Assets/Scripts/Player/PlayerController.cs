@@ -21,17 +21,23 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        // Horizontal movement (Left/Right)
         float moveInput = Input.GetAxis("Horizontal");
         rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
 
-        // Check if the player is grounded before allowing jump
+        // Check if grounded before jumping
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        Debug.Log(isGrounded);
 
-        // Jumping input, only jump if the player is grounded
+        // Jump with variable height
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        }
+
+        // If the player releases the jump button early, reduce upward velocity for a "shorter" jump
+        if (Input.GetButtonUp("Jump") && rb.velocity.y > 0)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
         }
     }
 }

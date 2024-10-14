@@ -12,6 +12,8 @@ public class PlayerMovement : MonoBehaviour
     // This will allow us to detect where the player is standing
     public Transform groundCheck;     
     public float groundCheckRadius = 0.2f;  // Radius to check for ground
+    public WeaponClass currentWeapon;
+    public WeaponClass offhandWeapon;
 
     void Start()
     {
@@ -26,7 +28,6 @@ public class PlayerMovement : MonoBehaviour
 
         // Check if grounded before jumping
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-        Debug.Log(isGrounded);
 
         // Jump with variable height
         if (Input.GetButtonDown("Jump") && isGrounded)
@@ -38,6 +39,11 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetButtonUp("Jump") && rb.velocity.y > 0)
         {
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+        }
+
+        if (Input.GetButtonDown("Fire1"))
+        {
+            currentWeapon.Attack();
         }
     }
 }

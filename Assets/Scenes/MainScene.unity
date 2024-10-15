@@ -514,6 +514,7 @@ GameObject:
   - component: {fileID: 1066561358}
   - component: {fileID: 1066561362}
   - component: {fileID: 1066561361}
+  - component: {fileID: 1066561363}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -635,6 +636,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   groundCheck: {fileID: 425478771}
+  animator: {fileID: 1066561363}
   groundCheckRadius: 0.2
   currentWeapon: {fileID: 265238766}
   offhandWeapon: {fileID: 0}
@@ -683,6 +685,27 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 2.303327, y: 3.384402}
   m_EdgeRadius: 0
+--- !u!95 &1066561363
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1066561357}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1320361155
 GameObject:
   m_ObjectHideFlags: 0

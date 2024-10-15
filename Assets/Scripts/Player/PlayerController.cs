@@ -1,49 +1,79 @@
 using UnityEngine;
+using S2dio.State;
 
-public class PlayerMovement : MonoBehaviour
-{
-    public float moveSpeed = 5f;      // Speed for horizontal movement
-    public float jumpForce = 10f;     // Force applied when jumping
-    public LayerMask groundLayer;     // To detect ground layer for jumping
+namespace S2dio.Player {
+    public class PlayerController : MonoBehaviour {
+        public float moveSpeed = 5f;
+        public float jumpForce = 10f;
+        public LayerMask groundLayer;
+        public Transform groundCheck;
+        public Animator animator;
+        public float groundCheckRadius = 0.2f;
+        public WeaponClass currentWeapon;
+        public WeaponClass offhandWeapon;
+        private Rigidbody2D rb;
+        private bool isGrounded = false;
+        private StateMachine stateMachine;
+        private WalkState walkState;
+        private JumpState jumpState;
 
-    private Rigidbody2D rb;           // Reference to the Rigidbody2D component
-    private bool isGrounded = false;  // Check if the player is on the ground
+        void Start() {
+            rb = GetComponent<Rigidbody2D>();
+            SetupStateMachine();
+        }
 
-    // This will allow us to detect where the player is standing
-    public Transform groundCheck;     
-    public float groundCheckRadius = 0.2f;  // Radius to check for ground
-    public WeaponClass currentWeapon;
-    public WeaponClass offhandWeapon;
+        void SetupStateMachine() {
+            stateMachine = new StateMachine();
 
-    void Start()
-    {
-        // Get the Rigidbody2D component attached to the player
-        rb = GetComponent<Rigidbody2D>();
-    }
+            // Initialize states
+            walkState = new WalkState(this, animator);
+            jumpState = new JumpState(this, animator);
+            
+            // Add transitions based on conditions
+            stateMachine.AddTransition(walkState, jumpState, new FuncPredicate(() => !isGrounded));
+            stateMachine.AddTransition(jumpState, walkState, new FuncPredicate(() => isGrounded));
 
-    void Update()
-    {
-        float moveInput = Input.GetAxis("Horizontal");
-        rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+            // Set initial state
+            stateMachine.SetState(walkState);
+        }
 
-        // Check if grounded before jumping
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        void Update() {
+            stateMachine.Update();
+            HandleGroundCheck();
+            HandleInput();
+        }
 
-        // Jump with variable height
-        if (Input.GetButtonDown("Jump") && isGrounded)
-        {
+        void HandleInput() {
+            // Handle horizontal movement
+            float moveInput = Input.GetAxis("Horizontal");
+            HandleMovement(moveInput);
+
+            // Jump logic
+            if (Input.GetButtonDown("Jump") && isGrounded) {
+                HandleJump();
+            }
+
+            // Attack logic
+            if (Input.GetButtonDown("Fire1")) {
+                currentWeapon.Attack();
+            }
+        }
+
+        public void HandleMovement(float moveInput) {
+            rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+        }
+
+        public void HandleJump() {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         }
 
-        // If the player releases the jump button early, reduce upward velocity for a "shorter" jump
-        if (Input.GetButtonUp("Jump") && rb.velocity.y > 0)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+        void HandleGroundCheck() {
+            isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
         }
 
-        if (Input.GetButtonDown("Fire1"))
-        {
-            currentWeapon.Attack();
+        // Method to access isGrounded for states
+        public bool IsGrounded() {
+            return isGrounded;
         }
     }
 }

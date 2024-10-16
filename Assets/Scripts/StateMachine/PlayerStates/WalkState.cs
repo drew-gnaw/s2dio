@@ -13,14 +13,16 @@ namespace S2dio.State {
             
         }
 
-        public override void OnExit() {
-            // Cleanup when exiting the walking state (e.g., reset animations)
-        }
-
         public override void FixedUpdate()
         {
             float moveInput = Input.GetAxis("Horizontal");
             player.HandleMovement(moveInput);
         }
+        
+        public override void OnExit() {
+            // Cleanup when exiting the walking state (e.g., reset animations)
+        }
+
+        
     }
 }

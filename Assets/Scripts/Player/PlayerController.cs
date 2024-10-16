@@ -10,8 +10,8 @@ namespace S2dio.Player
         public float attackCooldownDuration = 0.5f;
 
         [Header("Jump Settings")]
-        [SerializeField] float jumpForce = 10f;
-        [SerializeField] float jumpDuration = 0.5f;
+        [SerializeField] float jumpForce = 7f;
+        [SerializeField] float jumpDuration = 0.2f;
         [SerializeField] float jumpCooldown = 0f;
         [SerializeField] float gravityMultiplier = 3f;
 
@@ -110,12 +110,10 @@ namespace S2dio.Player
         {
             if (performed && !jumpTimer.IsRunning && !jumpTimer.IsRunning && isGrounded)
             {
-                // Start jump action
                 jumpTimer.Start();
             }
             else if (!performed && jumpTimer.IsRunning)
             {
-                // End jump action (jump button released)
                 jumpTimer.Stop();
             }
         }

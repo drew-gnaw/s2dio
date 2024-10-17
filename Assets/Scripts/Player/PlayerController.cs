@@ -18,6 +18,7 @@ namespace S2dio.Player
         [SerializeField] float jumpCooldown = 0f;
         [SerializeField] float gravityMultiplier = 3f;
         [SerializeField] float maxSlidingSpeed = 4f;
+        [SerializeField] float wallJumpPower = 2f;
         
 
         public float moveSpeed = 5f;
@@ -66,6 +67,7 @@ namespace S2dio.Player
             At(walkState, slidingState, new FuncPredicate(() => isSlidingLeft || isSlidingRight));
             At(jumpState, slidingState, new FuncPredicate(() => isSlidingLeft || isSlidingRight));
             At(slidingState, walkState, new FuncPredicate(() => !isSlidingLeft && !isSlidingRight));
+            At(slidingState, jumpState, new FuncPredicate(() => jumpTimer.IsRunning));
 
             stateMachine.SetState(walkState);
         }
@@ -121,7 +123,7 @@ namespace S2dio.Player
 
         void OnJump(bool performed)
         {
-            if (performed && !jumpTimer.IsRunning && !jumpTimer.IsRunning && isGrounded)
+            if (performed && !jumpTimer.IsRunning && (isGrounded || isSlidingLeft || isSlidingRight) )
             {
                 jumpTimer.Start();
             }
@@ -130,8 +132,6 @@ namespace S2dio.Player
                 jumpTimer.Stop();
             }
         }
-
-
 
         public void HandleJump()
         {
@@ -146,7 +146,18 @@ namespace S2dio.Player
                 jumpVelocity += Physics.gravity.y * gravityMultiplier * Time.fixedDeltaTime;
             }
 
-            rb.velocity = new Vector2(rb.velocity.x, jumpVelocity);
+            float xVelocity = 0;
+
+            if (isSlidingLeft)
+            {
+                xVelocity = -1;
+            } 
+            else if (isSlidingRight) 
+            {
+                xVelocity = 1;
+            }
+
+            rb.velocity = new Vector2(rb.velocity.x + xVelocity * wallJumpPower, jumpVelocity);
         }
 
         public void HandleAttack()

@@ -1307,6 +1307,10 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 6488805757808827087, guid: 26f2309bb06480d468bc0e15e77500f1, type: 3}
+      propertyPath: wallJumpPower
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6488805757808827087, guid: 26f2309bb06480d468bc0e15e77500f1, type: 3}
       propertyPath: maxSlidingSpeed
       value: 2
       objectReference: {fileID: 0}

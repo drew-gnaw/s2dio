@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class DialogueManager : MonoBehaviour
 {
@@ -31,6 +32,7 @@ public class DialogueManager : MonoBehaviour
             Destroy(this);
         }
         activeDialogueBox = pictureDialogueBox;
+        SceneManager.sceneLoaded += OnSceneChange;
     }
 
     //Manager is going to listen to a bunch of events that then cause it to gain new sentences and 
@@ -147,6 +149,11 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
+    void OnSceneChange(Scene s, LoadSceneMode m)
+    {
+        EndDialogue();
+    }
+
     void EndDialogue()
     {
         ClearPanel();
@@ -154,8 +161,6 @@ public class DialogueManager : MonoBehaviour
 
     void Update()
     {
-        // if (PauseMenu.IsPaused) return;
-
         if (Input.GetKeyDown(KeyCode.Mouse0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKey(KeyCode.RightArrow))
         {
             if (inDialogue)

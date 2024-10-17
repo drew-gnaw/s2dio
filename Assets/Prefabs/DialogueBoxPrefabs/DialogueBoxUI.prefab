@@ -315,10 +315,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5892e88b9a4a93f4884b79a1120cf00c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bodyText: {fileID: 0}
-  nameText: {fileID: 0}
-  displayingImage: {fileID: 0}
-  aspectRatioFitter: {fileID: 0}
+  bodyText: {fileID: 5240262970261086955}
+  nameText: {fileID: 1880917191316494813}
+  displayingImage: {fileID: 5254580660834896913}
+  aspectRatioFitter: {fileID: 5844923077249208032}
   rollingSpeed: 0
 --- !u!1 &6371435518416139219
 GameObject:

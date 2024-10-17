@@ -168,6 +168,7 @@ MonoBehaviour:
   jumpDuration: 0.2
   jumpCooldown: 0
   gravityMultiplier: 3
+  maxSlidingSpeed: 4
   moveSpeed: 5
   attackCooldownDuration: 0.5
   animator: {fileID: 4781206987878033173}
@@ -242,7 +243,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: c3d439e494ee7d843a8a5800f5b34b45, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

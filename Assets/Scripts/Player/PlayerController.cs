@@ -65,7 +65,7 @@ namespace S2dio.Player
             Any(walkState, new FuncPredicate(ReturnTowalkState));
             At(walkState, slidingState, new FuncPredicate(() => isSlidingLeft || isSlidingRight));
             At(jumpState, slidingState, new FuncPredicate(() => isSlidingLeft || isSlidingRight));
-            At(slidingState, walkState, new FuncPredicate(ReturnTowalkState));
+            At(slidingState, walkState, new FuncPredicate(() => !isSlidingLeft && !isSlidingRight));
 
             stateMachine.SetState(walkState);
         }

@@ -633,9 +633,9 @@ MonoBehaviour:
   moveSpeed: 5
   attackCooldownDuration: 0.5
   jumpForce: 7
-  jumpDuration: 0.1
+  jumpDuration: 0.2
   jumpCooldown: 0
-  gravityMultiplier: 1.5
+  gravityMultiplier: 3
   groundLayer:
     serializedVersion: 2
     m_Bits: 8

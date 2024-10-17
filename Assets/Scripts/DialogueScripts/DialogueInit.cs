@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public static class PrefabInitializer
+public static class DialogueInit
 {
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     public static void InitializePrefab()

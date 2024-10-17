@@ -7,9 +7,6 @@ using UnityEngine.SceneManagement;
 public class DialogueManager : MonoBehaviour
 {
     public static DialogueManager Instance { get; private set; }
-
-
-
     private DialogueBox activeDialogueBox;
     [SerializeField]
     private DialogueBox picturelessDialogueBoxComponent;

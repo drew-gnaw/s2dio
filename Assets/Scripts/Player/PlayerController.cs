@@ -71,6 +71,7 @@ namespace S2dio.Player
 
             At(walkState, jumpState, new FuncPredicate(() => jumpTimer.IsRunning));
             Any(walkState, new FuncPredicate(ReturnTowalkState));
+            // Any(slidingState, new FuncPredicate(() => isSlidingLeft || isSlidingRight));
             At(walkState, slidingState, new FuncPredicate(() => isSlidingLeft || isSlidingRight));
             At(jumpState, slidingState, new FuncPredicate(() => isSlidingLeft || isSlidingRight));
             At(slidingState, walkState, new FuncPredicate(() => !isSlidingLeft && !isSlidingRight));
@@ -104,7 +105,6 @@ namespace S2dio.Player
             HandleWallCheck();
             HandleInput();
             HandleTimers();
-            Debug.Log(wallJumpTimer.IsRunning);
         }
 
         void HandleTimers()

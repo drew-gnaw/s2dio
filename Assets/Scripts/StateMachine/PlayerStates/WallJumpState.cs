@@ -15,7 +15,7 @@ namespace S2dio.State {
         }
 
         public override void FixedUpdate() {
-            player.HandleWallJump(); // Handle jumping logic here
+            player.HandleWallJump();
         }
 
         public override void OnExit() {

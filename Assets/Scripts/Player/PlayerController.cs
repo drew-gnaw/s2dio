@@ -207,7 +207,7 @@ namespace S2dio.Player
                 StartCoroutine(DisableHorizontalMovementCoroutine(0.5f));
             }
 
-            rb.velocity = new Vector2(xVelocity * wallJumpPower, jumpVelocity);
+            rb.velocity += new Vector2(xVelocity * wallJumpPower, jumpVelocity);
         }
 
 

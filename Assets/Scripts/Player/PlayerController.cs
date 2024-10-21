@@ -1,6 +1,7 @@
 using UnityEngine;
 using S2dio.State;
 using S2dio.Utils;
+using System.Collections;
 
 namespace S2dio.Player
 {
@@ -8,7 +9,7 @@ namespace S2dio.Player
     {
         [Header("References")]
         public LayerMask groundLayer;
-        public Transform groundCheck;
+        public BoxCollider2D groundCheck;
         public BoxCollider2D leftWallCheck;
         public BoxCollider2D rightWallCheck;
 
@@ -19,7 +20,7 @@ namespace S2dio.Player
         [SerializeField] float gravityMultiplier = 3f;
         [SerializeField] float maxSlidingSpeed = 4f;
         [SerializeField] float wallJumpPower = 2f;
-        
+
 
         public float moveSpeed = 5f;
         public float attackCooldownDuration = 0.5f;
@@ -36,11 +37,16 @@ namespace S2dio.Player
         private WalkState walkState;
         private JumpState jumpState;
         private SlidingState slidingState;
+        private WallJumpState wallJumpState;
 
         // Timers
         private CountdownTimer jumpTimer;
         private CountdownTimer jumpCooldownTimer;
+        private CountdownTimer wallJumpTimer;
+
+
         private CountdownTimer attackTimer;
+        private bool allowHorizontalInput = true;
 
         float jumpVelocity;
 
@@ -61,13 +67,16 @@ namespace S2dio.Player
             walkState = new WalkState(this, animator);
             jumpState = new JumpState(this, animator);
             slidingState = new SlidingState(this, animator);
+            wallJumpState = new WallJumpState(this, animator);
 
             At(walkState, jumpState, new FuncPredicate(() => jumpTimer.IsRunning));
             Any(walkState, new FuncPredicate(ReturnTowalkState));
+            // Any(slidingState, new FuncPredicate(() => isSlidingLeft || isSlidingRight));
             At(walkState, slidingState, new FuncPredicate(() => isSlidingLeft || isSlidingRight));
             At(jumpState, slidingState, new FuncPredicate(() => isSlidingLeft || isSlidingRight));
             At(slidingState, walkState, new FuncPredicate(() => !isSlidingLeft && !isSlidingRight));
-            At(slidingState, jumpState, new FuncPredicate(() => jumpTimer.IsRunning));
+            At(slidingState, wallJumpState, new FuncPredicate(() => wallJumpTimer.IsRunning));
+            At(wallJumpState, walkState, new FuncPredicate(() => !wallJumpTimer.IsRunning));
 
             stateMachine.SetState(walkState);
         }
@@ -81,9 +90,11 @@ namespace S2dio.Player
         {
             jumpTimer = new CountdownTimer(jumpDuration);
             jumpCooldownTimer = new CountdownTimer(jumpCooldown);
+            wallJumpTimer = new CountdownTimer(jumpDuration);
 
             jumpTimer.OnTimerStart += () => jumpVelocity = jumpForce;
             jumpTimer.OnTimerStop += () => jumpCooldownTimer.Start();
+            wallJumpTimer.OnTimerStop += () => jumpCooldownTimer.Start();
             attackTimer = new CountdownTimer(attackCooldownDuration);
         }
 
@@ -96,6 +107,13 @@ namespace S2dio.Player
             HandleTimers();
         }
 
+        void HandleTimers()
+        {
+            jumpTimer.Tick(Time.deltaTime);
+            wallJumpTimer.Tick(Time.deltaTime);
+            attackTimer.Tick(Time.deltaTime);
+        }
+
         void FixedUpdate()
         {
             stateMachine.FixedUpdate();
@@ -103,8 +121,11 @@ namespace S2dio.Player
 
         void HandleInput()
         {
-            float moveInput = Input.GetAxis("Horizontal");
-            HandleMovement(moveInput);
+            if (allowHorizontalInput)
+            {
+                float moveInput = Input.GetAxis("Horizontal");
+                HandleMovement(moveInput);
+            }
 
             if (Input.GetButtonDown("Jump"))
             {
@@ -123,13 +144,27 @@ namespace S2dio.Player
 
         void OnJump(bool performed)
         {
-            if (performed && !jumpTimer.IsRunning && (isGrounded || isSlidingLeft || isSlidingRight) )
+            if (isSlidingLeft || isSlidingRight)
             {
-                jumpTimer.Start();
+                if (performed && !jumpTimer.IsRunning)
+                {
+                    wallJumpTimer.Start();
+                }
+                else if (!performed && jumpTimer.IsRunning)
+                {
+                    wallJumpTimer.Stop();
+                }
             }
-            else if (!performed && jumpTimer.IsRunning)
+            else
             {
-                jumpTimer.Stop();
+                if (performed && !jumpTimer.IsRunning && isGrounded)
+                {
+                    jumpTimer.Start();
+                }
+                else if (!performed && jumpTimer.IsRunning)
+                {
+                    jumpTimer.Stop();
+                }
             }
         }
 
@@ -146,19 +181,35 @@ namespace S2dio.Player
                 jumpVelocity += Physics.gravity.y * gravityMultiplier * Time.fixedDeltaTime;
             }
 
+            rb.velocity = new Vector2(rb.velocity.x, jumpVelocity);
+        }
+
+        public void HandleWallJump()
+        {
+            if (!wallJumpTimer.IsRunning)
+            {
+                jumpVelocity += Physics.gravity.y * gravityMultiplier * Time.fixedDeltaTime;
+            }
+
             float xVelocity = 0;
 
             if (isSlidingLeft)
             {
-                xVelocity = -1;
-            } 
-            else if (isSlidingRight) 
-            {
                 xVelocity = 1;
             }
+            else if (isSlidingRight)
+            {
+                xVelocity = -1;
+            }
 
-            rb.velocity = new Vector2(rb.velocity.x + xVelocity * wallJumpPower, jumpVelocity);
+            if (xVelocity != 0)
+            {
+                StartCoroutine(DisableHorizontalMovementCoroutine(0.5f));
+            }
+
+            rb.velocity += new Vector2(xVelocity * wallJumpPower, jumpVelocity);
         }
+
 
         public void HandleAttack()
         {
@@ -173,25 +224,29 @@ namespace S2dio.Player
 
         void HandleGroundCheck()
         {
-            Vector2 boxSize = new Vector2(1.0f, 0.01f);
-            isGrounded = Physics2D.OverlapBox(groundCheck.position, boxSize, 0f, groundLayer);
+            isGrounded = groundCheck.IsTouchingLayers(groundLayer);
         }
 
         void HandleWallCheck()
         {
-            isSlidingLeft = leftWallCheck.IsTouchingLayers(groundLayer);
-            isSlidingRight = rightWallCheck.IsTouchingLayers(groundLayer);
-        }
+            bool isLeftKeyPressed = Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A);
+            bool isRightKeyPressed = Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D);
 
-        void HandleTimers()
-        {
-            jumpTimer.Tick(Time.deltaTime);
-            attackTimer.Tick(Time.deltaTime);
+            isSlidingLeft = leftWallCheck.IsTouchingLayers(groundLayer) && isLeftKeyPressed;
+            isSlidingRight = rightWallCheck.IsTouchingLayers(groundLayer) && isRightKeyPressed;
+
         }
 
         public void HandleMovement(float moveInput)
         {
             rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+        }
+
+        private IEnumerator DisableHorizontalMovementCoroutine(float seconds)
+        {
+            allowHorizontalInput = false;
+            yield return new WaitForSeconds(seconds);
+            allowHorizontalInput = true;
         }
     }
 

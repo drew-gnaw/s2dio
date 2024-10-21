@@ -31,14 +31,17 @@ namespace S2dio.Player
 
         private Rigidbody2D rb;
         private bool isGrounded = false;
-        private bool isSlidingLeft = false;
-        private bool isSlidingRight = false;
+
+        public bool IsSlidingLeft { get; private set; } = false;
+        public bool IsSlidingRight { get; private set; } = false;
+
         private StateMachine stateMachine;
         private WalkState walkState;
         private JumpState jumpState;
-        private SlidingState slidingState;
+        private SlideState slideState;
         private WallJumpState wallJumpState;
-
+        private FallState fallState;
+        
         // Timers
         private CountdownTimer jumpTimer;
         private CountdownTimer jumpCooldownTimer;
@@ -66,24 +69,29 @@ namespace S2dio.Player
 
             walkState = new WalkState(this, animator);
             jumpState = new JumpState(this, animator);
-            slidingState = new SlidingState(this, animator);
+            slideState = new SlideState(this, animator);
             wallJumpState = new WallJumpState(this, animator);
+            fallState = new FallState(this, animator);
 
             At(walkState, jumpState, new FuncPredicate(() => jumpTimer.IsRunning));
             Any(walkState, new FuncPredicate(ReturnTowalkState));
-            // Any(slidingState, new FuncPredicate(() => isSlidingLeft || isSlidingRight));
-            At(walkState, slidingState, new FuncPredicate(() => isSlidingLeft || isSlidingRight));
-            At(jumpState, slidingState, new FuncPredicate(() => isSlidingLeft || isSlidingRight));
-            At(slidingState, walkState, new FuncPredicate(() => !isSlidingLeft && !isSlidingRight));
-            At(slidingState, wallJumpState, new FuncPredicate(() => wallJumpTimer.IsRunning));
-            At(wallJumpState, walkState, new FuncPredicate(() => !wallJumpTimer.IsRunning));
+
+            At(jumpState, fallState, new FuncPredicate(() => rb.velocity.y < -0.1f));
+            At(wallJumpState, fallState, new FuncPredicate(() => rb.velocity.y < -0.1f));
+            At(walkState, fallState, new FuncPredicate(() => rb.velocity.y < -0.1f));
+            
+            At(fallState, slideState, new FuncPredicate(() => IsSlidingLeft || IsSlidingRight));
+            
+            At(slideState, walkState, new FuncPredicate(() => !IsSlidingLeft && !IsSlidingRight));
+            At(slideState, wallJumpState, new FuncPredicate(() => wallJumpTimer.IsRunning));
+            At(jumpState, wallJumpState, new FuncPredicate(() => wallJumpTimer.IsRunning));
 
             stateMachine.SetState(walkState);
         }
 
         bool ReturnTowalkState()
         {
-            return isGrounded && !jumpTimer.IsRunning;
+            return isGrounded && !jumpTimer.IsRunning && !wallJumpTimer.IsRunning;
         }
 
         void SetupTimers()
@@ -93,6 +101,7 @@ namespace S2dio.Player
             wallJumpTimer = new CountdownTimer(jumpDuration);
 
             jumpTimer.OnTimerStart += () => jumpVelocity = jumpForce;
+            wallJumpTimer.OnTimerStart += () => jumpVelocity = jumpForce;
             jumpTimer.OnTimerStop += () => jumpCooldownTimer.Start();
             wallJumpTimer.OnTimerStop += () => jumpCooldownTimer.Start();
             attackTimer = new CountdownTimer(attackCooldownDuration);
@@ -144,13 +153,13 @@ namespace S2dio.Player
 
         void OnJump(bool performed)
         {
-            if (isSlidingLeft || isSlidingRight)
+            if (IsSlidingLeft || IsSlidingRight)
             {
-                if (performed && !jumpTimer.IsRunning)
+                if (performed && !wallJumpTimer.IsRunning)
                 {
                     wallJumpTimer.Start();
                 }
-                else if (!performed && jumpTimer.IsRunning)
+                else if (!performed && wallJumpTimer.IsRunning)
                 {
                     wallJumpTimer.Stop();
                 }
@@ -170,12 +179,6 @@ namespace S2dio.Player
 
         public void HandleJump()
         {
-            if (!jumpTimer.IsRunning && isGrounded)
-            {
-                jumpVelocity = 0f;
-                return;
-            }
-
             if (!jumpTimer.IsRunning)
             {
                 jumpVelocity += Physics.gravity.y * gravityMultiplier * Time.fixedDeltaTime;
@@ -184,30 +187,29 @@ namespace S2dio.Player
             rb.velocity = new Vector2(rb.velocity.x, jumpVelocity);
         }
 
-        public void HandleWallJump()
+        public void HandleWallJump(int xVelocity)
         {
             if (!wallJumpTimer.IsRunning)
             {
                 jumpVelocity += Physics.gravity.y * gravityMultiplier * Time.fixedDeltaTime;
             }
 
-            float xVelocity = 0;
+            
 
-            if (isSlidingLeft)
-            {
-                xVelocity = 1;
-            }
-            else if (isSlidingRight)
-            {
-                xVelocity = -1;
-            }
+            Debug.Log(xVelocity);
 
-            if (xVelocity != 0)
-            {
-                StartCoroutine(DisableHorizontalMovementCoroutine(0.5f));
-            }
+            rb.velocity = new Vector2(xVelocity * wallJumpPower, jumpVelocity);
+        }
 
-            rb.velocity += new Vector2(xVelocity * wallJumpPower, jumpVelocity);
+        public void HandleFall()
+        {
+            jumpVelocity += Physics.gravity.y * gravityMultiplier * Time.fixedDeltaTime;
+            rb.velocity = new Vector2(rb.velocity.x, jumpVelocity);
+        }
+
+        public void ZeroYVelocity()
+        {
+            rb.velocity = new Vector2(rb.velocity.x, 0f);
         }
 
 
@@ -232,8 +234,8 @@ namespace S2dio.Player
             bool isLeftKeyPressed = Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A);
             bool isRightKeyPressed = Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D);
 
-            isSlidingLeft = leftWallCheck.IsTouchingLayers(groundLayer) && isLeftKeyPressed;
-            isSlidingRight = rightWallCheck.IsTouchingLayers(groundLayer) && isRightKeyPressed;
+            IsSlidingLeft = leftWallCheck.IsTouchingLayers(groundLayer) && isLeftKeyPressed;
+            IsSlidingRight = rightWallCheck.IsTouchingLayers(groundLayer) && isRightKeyPressed;
 
         }
 

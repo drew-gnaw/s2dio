@@ -16,6 +16,8 @@ namespace S2dio.State {
             current.State?.Update();
         }
         
+        public IState CurrentState => current?.State;
+        
         public void FixedUpdate() {
             current.State?.FixedUpdate();
         }

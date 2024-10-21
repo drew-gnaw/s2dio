@@ -7,19 +7,19 @@ namespace S2dio.Player
 {
     public class PlayerController : MonoBehaviour
     {
-        [Header("References")]
-        public LayerMask groundLayer;
+        [Header("References")] public LayerMask groundLayer;
         public BoxCollider2D groundCheck;
         public BoxCollider2D leftWallCheck;
         public BoxCollider2D rightWallCheck;
 
-        [Header("Jump Settings")]
-        [SerializeField] float jumpForce = 7f;
+        [Header("Jump Settings")] [SerializeField]
+        float jumpForce = 7f;
+
         [SerializeField] float jumpDuration = 0.2f;
         [SerializeField] float jumpCooldown = 0f;
         [SerializeField] float gravityMultiplier = 3f;
         [SerializeField] float maxSlidingSpeed = 4f;
-        [SerializeField] float wallJumpPower = 2f;
+        [SerializeField] public float wallJumpPower = 2f;
 
 
         public float moveSpeed = 5f;
@@ -41,7 +41,7 @@ namespace S2dio.Player
         private SlideState slideState;
         private WallJumpState wallJumpState;
         private FallState fallState;
-        
+
         // Timers
         private CountdownTimer jumpTimer;
         private CountdownTimer jumpCooldownTimer;
@@ -52,6 +52,7 @@ namespace S2dio.Player
         private bool allowHorizontalInput = true;
 
         float jumpVelocity;
+        float xVelocity;
 
         void Start()
         {
@@ -79,9 +80,9 @@ namespace S2dio.Player
             At(jumpState, fallState, new FuncPredicate(() => rb.velocity.y < -0.1f));
             At(wallJumpState, fallState, new FuncPredicate(() => rb.velocity.y < -0.1f));
             At(walkState, fallState, new FuncPredicate(() => rb.velocity.y < -0.1f));
-            
+
             At(fallState, slideState, new FuncPredicate(() => IsSlidingLeft || IsSlidingRight));
-            
+
             At(slideState, walkState, new FuncPredicate(() => !IsSlidingLeft && !IsSlidingRight));
             At(slideState, wallJumpState, new FuncPredicate(() => wallJumpTimer.IsRunning));
             At(jumpState, wallJumpState, new FuncPredicate(() => wallJumpTimer.IsRunning));
@@ -187,29 +188,22 @@ namespace S2dio.Player
             rb.velocity = new Vector2(rb.velocity.x, jumpVelocity);
         }
 
-        public void HandleWallJump(int xVelocity)
+        public void HandleWallJump(int wallJumpDirection)
         {
             if (!wallJumpTimer.IsRunning)
             {
                 jumpVelocity += Physics.gravity.y * gravityMultiplier * Time.fixedDeltaTime;
             }
 
-            
+            StartCoroutine(DisableHorizontalMovementCoroutine(0.5f));
 
-            Debug.Log(xVelocity);
-
-            rb.velocity = new Vector2(xVelocity * wallJumpPower, jumpVelocity);
+            rb.velocity = new Vector2(rb.velocity.x, jumpVelocity);
         }
 
         public void HandleFall()
         {
             jumpVelocity += Physics.gravity.y * gravityMultiplier * Time.fixedDeltaTime;
             rb.velocity = new Vector2(rb.velocity.x, jumpVelocity);
-        }
-
-        public void ZeroYVelocity()
-        {
-            rb.velocity = new Vector2(rb.velocity.x, 0f);
         }
 
 
@@ -236,12 +230,25 @@ namespace S2dio.Player
 
             IsSlidingLeft = leftWallCheck.IsTouchingLayers(groundLayer) && isLeftKeyPressed;
             IsSlidingRight = rightWallCheck.IsTouchingLayers(groundLayer) && isRightKeyPressed;
-
         }
+
 
         public void HandleMovement(float moveInput)
         {
-            rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+            xVelocity = moveInput * moveSpeed;
+            rb.velocity = new Vector2(xVelocity, rb.velocity.y);
+        }
+
+        public void ZeroYVelocity()
+        {
+            rb.velocity = new Vector2(rb.velocity.x, 0f);
+        }
+
+        public void AddHorizontalVelocity(float velocity)
+        {
+            xVelocity += velocity;
+            Debug.Log(xVelocity);
+            rb.velocity = new Vector2(xVelocity, rb.velocity.y);
         }
 
         private IEnumerator DisableHorizontalMovementCoroutine(float seconds)
@@ -251,5 +258,4 @@ namespace S2dio.Player
             allowHorizontalInput = true;
         }
     }
-
 }

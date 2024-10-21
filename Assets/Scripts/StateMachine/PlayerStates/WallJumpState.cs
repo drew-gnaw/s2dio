@@ -4,20 +4,22 @@ using S2dio.Player;
 namespace S2dio.State {
     public class WallJumpState : BaseState {
         public WallJumpState(PlayerController player, Animator animator) : base(player, animator) { }
-        private int xVelocity;
+        private int wallJumpDirection;
 
         public override void OnEnter() {
             player.ZeroYVelocity();
-            xVelocity = 0;
+            wallJumpDirection = 0;
 
             if (player.IsSlidingLeft)
             {
-                xVelocity = 1;
+                wallJumpDirection = 1;
             }
             else if (player.IsSlidingRight)
             {
-                xVelocity = -1;
+                wallJumpDirection = -1;
             }
+            
+            player.AddHorizontalVelocity(wallJumpDirection * player.wallJumpPower);
         }
 
         public override void Update() {
@@ -26,12 +28,12 @@ namespace S2dio.State {
         }
 
         public override void FixedUpdate() {
-            player.HandleWallJump(xVelocity);
+            player.HandleWallJump(wallJumpDirection);
         }
 
         public override void OnExit()
         {
-            xVelocity = 0;
+            wallJumpDirection = 0;
         }
     }
 }
